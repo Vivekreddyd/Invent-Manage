@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SERVER_IP = "192.168.240.1"; //server IP address
     public static final int SERVER_PORT = 5555;
     public String response = "";
-    public String input_rfid="";
+    public static String input_rfid="";
     public boolean conn_to_server = false;
     BlockingQueue queue;
 
@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //new ServerTask().execute("");
-        thread.start();
+        new ServerTask().execute("");
+//        thread.start();
 //        AnotherClass object= new AnotherClass (this);
 //        object.start();
     }
@@ -63,17 +63,18 @@ public class MainActivity extends AppCompatActivity {
 
         String scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         Context context = getApplicationContext();
+
         System.out.println("Scan Result"+scanResult);
         System.out.println("Input" + input_rfid);
 
         if(scanResult!=null) {
-            if (input_rfid.equals(scanResult)) {
+            if (input_rfid.equals("["+scanResult+"]")) {
                 CharSequence text = "Matches with RFID";
                 Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
                 TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
                 v.setTextColor(Color.GREEN);
                 toast.show();
-            } else if (!input_rfid.equals(scanResult)) {
+            } else if (!input_rfid.equals("["+scanResult+"]")) {
                 CharSequence text = "Does not match with RFID";
                 Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
                 TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
@@ -91,15 +92,7 @@ public class MainActivity extends AppCompatActivity {
         input_rfid = str;
     }
 
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            TextView myTextView =
-                    (TextView)findViewById(R.id.myTextView);
-            myTextView.setText("Button Pressed");
-        }
-    };
-
+//  not used
     Thread thread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -145,53 +138,6 @@ public class MainActivity extends AppCompatActivity {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars,0,8);
-    }
-    public class AnotherClass extends Thread {
-
-        MainActivity mainActivity;
-
-        public AnotherClass (MainActivity mainActivity) {
-            // TODO Auto-generated constructor stub
-
-            this.mainActivity = mainActivity;
-        }
-
-        public void run() {
-            try{
-            //write other logic
-            Socket socket = new Socket(SERVER_IP, SERVER_PORT);
-
-            byte[] buffer = new byte[8];
-
-            InputStream inputStream = socket.getInputStream();
-
-			/*
-             * notice: inputStream.read() will block if no data return
-			 */
-            while ((inputStream.read(buffer)) != -1) {
-                response = null;
-                response = bytesToHex(buffer);
-                System.out.println(response);
-                start_intent();
-                mainActivity.setInput(response);
-                queue.put(response);
-            }
-			/*
-             * notice: inputStream.read() will block if no data return
-			 */
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            //write other logic
-        }
     }
 
     private class ServerTask extends AsyncTask<String, String, String> {
@@ -240,7 +186,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... values) {
             System.out.println(Arrays.toString(values));
-            input_rfid = Arrays.toString(values);
+            String temp = Arrays.toString(values);
+            input_rfid = temp.toString();
             System.out.println(input_rfid);
         }
     }
