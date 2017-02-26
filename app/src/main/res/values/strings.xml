@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Inventory Management</string>
+    <string name="waitingforconn">Waiting to receive data from the server</string>
+</resources>
